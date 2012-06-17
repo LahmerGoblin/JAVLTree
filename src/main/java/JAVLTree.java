@@ -1,8 +1,12 @@
+/**
+ */
 public class JAVLTree<T extends Comparable<T>> implements MySortedCollection<T> {
     private T value;
     private JAVLTree<T> parent;
     private int height=0;
 
+    // lazy vals
+    /** dynamically initialized Container for leftChild*/
     private JAVLTree<T> leftCache;
     public JAVLTree<T> leftChild() {
         if (leftCache == null) {
@@ -12,8 +16,8 @@ public class JAVLTree<T extends Comparable<T>> implements MySortedCollection<T> 
             return leftCache;
         }
     }
+    /** dynamically initialized Container for rightChild*/
     private JAVLTree<T> rightCache;
-
     public JAVLTree<T> rightChild() {
         if (rightCache == null) {
             rightCache = new JAVLTree<T>();
@@ -22,22 +26,25 @@ public class JAVLTree<T extends Comparable<T>> implements MySortedCollection<T> 
             return rightCache;
         }
     }
+    /** @see MySortedCollection#insert() */
     public void insert(T t){
+        // some special to do for the first insert :-)
         if ((this.getValue() == null) && (this.isRoot())) {
             this.value = t;
         } else {
+        // special thing for leaf 
         if (this.isLeaf()) {
             if (value.compareTo(t) < 0) {
                 rightChild().setValue(t);
-                System.out.println("Setting right Value on leaf");
             } else if (value.compareTo(t) > 0) {
                 leftChild().setValue(t);
-                System.out.println("setting left Valuei on leaf");
             } else {
+                // duplicates in tree are forbidden!
                 System.err.println("Already existing");
                 System.exit(1);
             }
         } else {
+        // and the dirty case of just one child... :-@
             if (value.compareTo(t) < 0) {
                 if (rightChild().getValue() != null) {
                     rightChild().insert(t);
@@ -54,13 +61,17 @@ public class JAVLTree<T extends Comparable<T>> implements MySortedCollection<T> 
                 System.err.println("Already existing");
                 System.exit(1);
             }
+            // AVL-features
             updateHeight();
             balance();
             updateHeight();
         }
         }
     }
+    /** @see MySortedCollection#printSorted() */
     public void printSorted() {
+        // left child is the smallest, than it's me and
+        // after all my right child!
         if (!(leftChild().getValue() == null)) {
             leftChild().printSorted();
         }
@@ -69,7 +80,9 @@ public class JAVLTree<T extends Comparable<T>> implements MySortedCollection<T> 
             rightChild().printSorted();
         }
     }
+    /** @see MySortedCollection#isElement() */
     public boolean isElement(T t) {
+        // remember why we invented a binary tree?
         if (value.compareTo(t) == 0) {
             return true;
         } else if (value.compareTo(t) > 0) {
@@ -78,16 +91,22 @@ public class JAVLTree<T extends Comparable<T>> implements MySortedCollection<T> 
             return leftChild().isElement(t);
         }
     }
+    /** selfdesribing, isn't it? :-D */
     public boolean isLeaf() {
         if ((leftChild().getValue() == null) && (rightChild().getValue() == null)) {
             return true;
+            // uhuu, got no children :'(
         } else {
             return false;
+            // uhu, got children :'(
         }
     }
+    /** is this tree the uppermost element? */
     public boolean isRoot() {
+        // yeah, I'm root! :-)
         return this.parent != null ? false:true;
     }
+    /** how tall is this tree now? */
     public void updateHeight() {
         int left = 0;
         int right = 0;
@@ -107,6 +126,7 @@ public class JAVLTree<T extends Comparable<T>> implements MySortedCollection<T> 
             height = biggerChild + 1;
         }
     }
+    /** is the AVLTree balanced? */
     private boolean isBalanced() {
         if (Math.abs(leftChild().getHeight()- rightChild().getHeight()) >= 1) {
             return true;
@@ -115,6 +135,7 @@ public class JAVLTree<T extends Comparable<T>> implements MySortedCollection<T> 
         }
 
     }
+    /** balance and rotate the tree according to the four cases */
     public void balance() {
             // case r r           case r l
             //  o ← this            o this
@@ -148,7 +169,6 @@ public class JAVLTree<T extends Comparable<T>> implements MySortedCollection<T> 
                         setRightChild(new JAVLTree<T>());
                    } else {
                        // case rl
-                       // parent().rightChild().equals(this)
                      if (!this.isRoot()) {
                        if (parent.rightChild().equals(this)) {
                            parent.setRightChild(rightChild().leftChild()); 
@@ -201,6 +221,7 @@ public class JAVLTree<T extends Comparable<T>> implements MySortedCollection<T> 
         }
 
     }
+    // some uninteressting getter/setter-trash
     public void setValue(T t) {
         value = t;
     }
