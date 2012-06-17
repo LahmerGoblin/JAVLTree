@@ -5,21 +5,33 @@ class SAVLTree[T <: Comparable[T]]
   var parent: SAVLTree[T]=null)
   extends AnyRef with MySortedCollection[T]{
 
-   lazy val leftChild: SAVLTree[T]= new SAVLTree(None,this)
-   lazy val rightChild: SAVLTree[T]= new SAVLTree(None,this)
+    var height:Int=_
+
+    // Lazy-Values
+    private var leftCache: Option[SAVLTree[T]] = None
+    def leftChild: SAVLTree[T]={
+      if (!leftCache.isDefined) leftCache = Some(new SAVLTree(None,this))
+      return leftCache.get
+    }
+
+    private var rightCache: Option[SAVLTree[T]] = None
+    def rightChild: SAVLTree[T]={
+      if(!rightCache.isDefined) rightCache = Some(new SAVLTree(None,this))
+        return rightCache.get
+    }
 
     def isBalanced(tree: SAVLTree[T]):Boolean = {
-      def depths(tree: SAVLTree[T], depth: Int = 0): List[Int] = {
+      def heights(tree: SAVLTree[T], height: Int = 0): List[Int] = {
          List() ++
-         (if (tree.leftChild.value.isDefined) depths(tree.leftChild,depth +1) else List()) ++
-         (if (tree.isLeaf) List(depth) else List()) ++
-         (if (tree.rightChild.value.isDefined) depths(tree.rightChild, depth +1) else List()) ++
+         (if (tree.leftChild.value.isDefined) heights(tree.leftChild,height +1) else List()) ++
+         (if (tree.isLeaf) List(height) else List()) ++
+         (if (tree.rightChild.value.isDefined) heights(tree.rightChild, height +1) else List()) ++
          List()
       }
 
-        val itsDepths = depths(tree)
-        val max = itsDepths.max
-        val diffs = itsDepths map (elem => max - elem)
+        val itsHeights = heights(tree)
+        val max = itsHeights.max
+        val diffs = itsHeights map (elem => max - elem)
           return !diffs.exists(elem=> max - elem >1)
     }
     def printSorted():Unit = {
@@ -33,14 +45,34 @@ class SAVLTree[T <: Comparable[T]]
     def insert(t: T):Unit = if (value isDefined) {
       val child = if ((t compareTo value.get) > 0) rightChild else leftChild
       child.insert(t)
-    } else value = Some(t)
+    } else {
+      value = Some(t)
+        updateHeight
+    }
+
+    def updateHeight = {
+       // if(
+          // rekursiv Höhe ändern
+    }
+    /*
+    // height initial auf -1! oder doch nicht mehr?
+    def updateHeight(newHeight: Int = 0):Unit = if(height < newHeight) {
+      height = newHeight
+      if (aParent.isDefined) {
+        val parent = aParent.get
+        parent.updateHeight(newHeight + 1)
+      }
+    } else rebalance()
+    */
     
     def isElement(t: T):Boolean= {
         ((leftChild == null)&&(rightChild == null))
     }
     def isLeaf :Boolean =  ((!leftChild.value.isDefined)&&(!rightChild.value.isDefined))
 
-    def balance = {}
+    def balance :Unit = {
+    
+    }
     
     override def toString = {
        value toString
